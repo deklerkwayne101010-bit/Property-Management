@@ -25,13 +25,7 @@ export async function GET(
             id: true,
             name: true,
             city: true,
-            owner: {
-              select: {
-                firstName: true,
-                lastName: true,
-                email: true
-              }
-            }
+            ownerId: true  // Now just the UUID, not a relation
           }
         }
       }
@@ -153,13 +147,7 @@ export async function PATCH(
             id: true,
             name: true,
             city: true,
-            owner: {
-              select: {
-                firstName: true,
-                lastName: true,
-                email: true
-              }
-            }
+            ownerId: true  // Now just the UUID, not a relation
           }
         }
       }
