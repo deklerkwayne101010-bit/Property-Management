@@ -11,7 +11,6 @@ export async function GET(
     const property = await prisma.property.findUnique({
       where: { id },
       include: {
-        ownerId: true,
         bookings: {
           include: {
             property: {
@@ -93,15 +92,6 @@ export async function PATCH(
         photos: body.photos ? JSON.stringify(body.photos) : null
       },
       include: {
-        owner: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-            phone: true
-          }
-        },
         _count: {
           select: {
             bookings: true,
