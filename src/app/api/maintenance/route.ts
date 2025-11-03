@@ -77,13 +77,7 @@ export async function GET(request: NextRequest) {
               id: true,
               name: true,
               city: true,
-              owner: {
-                select: {
-                  firstName: true,
-                  lastName: true,
-                  email: true
-                }
-              }
+              ownerId: true
             }
           }
         },
@@ -180,13 +174,7 @@ export async function POST(request: NextRequest) {
             id: true,
             name: true,
             city: true,
-            owner: {
-              select: {
-                firstName: true,
-                lastName: true,
-                email: true
-              }
-            }
+            ownerId: true
           }
         }
       }
