@@ -1,8 +1,12 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
-import jwt from 'jsonwebtoken'
-import { prisma } from './db'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -21,28 +25,32 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          const user = await prisma.user.findUnique({
-            where: { email: credentials.email }
+          // Use Supabase Auth to sign in user
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: credentials.email,
+            password: credentials.password,
           })
 
-          if (!user || !user.isActive) {
+          if (error || !data.user) {
+            console.error('Supabase auth error:', error)
             return null
           }
 
-          const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
+          // Extract user metadata for role information
+          const userMetadata = data.user.user_metadata || {}
+          const email = data.user.email
 
-          if (!isPasswordValid) {
-            return null
-          }
+          // If user is admin@propertybuddy.com, set admin role
+          const role = email === 'admin@propertybuddy.com' ? 'admin' : 'client'
 
           return {
-            id: user.id,
-            email: user.email,
-            name: `${user.firstName} ${user.lastName}`,
-            role: user.role,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            avatar: user.avatar || undefined
+            id: data.user.id,
+            email: data.user.email!,
+            name: `${userMetadata.firstName || ''} ${userMetadata.lastName || ''}`.trim() || data.user.email!,
+            role: role,
+            firstName: userMetadata.firstName || '',
+            lastName: userMetadata.lastName || '',
+            avatar: data.user.user_metadata?.avatar_url
           }
         } catch (error) {
           console.error('Auth error:', error)
@@ -76,20 +84,4 @@ export const authOptions: NextAuthOptions = {
     signIn: '/login'
   },
   secret: process.env.NEXTAUTH_SECRET
-}
-
-export function generateToken(userId: string, role: string) {
-  return jwt.sign(
-    { userId, role },
-    process.env.NEXTAUTH_SECRET!,
-    { expiresIn: '7d' }
-  )
-}
-
-export function verifyToken(token: string) {
-  try {
-    return jwt.verify(token, process.env.NEXTAUTH_SECRET!) as any
-  } catch (error) {
-    return null
-  }
 }

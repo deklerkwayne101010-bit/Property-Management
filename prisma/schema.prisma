@@ -6,8 +6,50 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+enum UserRole {
+  admin
+  client
+}
+
+enum BookingStatus {
+  pending
+  confirmed
+  cancelled
+  completed
+}
+
+enum MaintenanceType {
+  cleaning
+  maintenance
+}
+
+enum MaintenanceStatus {
+  scheduled
+  in_progress
+  completed
+  cancelled
+}
+
+enum PackageType {
+  flat_fee
+  percentage_per_booking
+  check_in_only
+}
+
+enum MessageType {
+  general
+  maintenance_alert
+  booking_notification
+}
+
+enum UploadType {
+  monthly_update
+  inspection
+  property_photos
 }
 
 model User {
@@ -69,7 +111,7 @@ model Booking {
   checkIn    DateTime
   checkOut   DateTime
   guests     Int
-  totalAmount Decimal @db.Decimal(10, 2)
+  totalAmount Float
   status     String   @default("pending") // 'pending', 'confirmed', 'cancelled', 'completed'
   notes      String?
   createdAt  DateTime @default(now())
@@ -126,9 +168,9 @@ model Package {
   ownerId         String
   name            String
   type            String   @default("flat_fee") // 'flat_fee', 'percentage_per_booking', 'check_in_only'
-  flatFeeAmount   Decimal? @db.Decimal(10, 2)
-  percentageRate  Decimal? @db.Decimal(5, 2)
-  checkInFee      Decimal? @db.Decimal(10, 2)
+  flatFeeAmount   Float?
+  percentageRate  Float?
+  checkInFee      Float?
   isActive        Boolean  @default(true)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
