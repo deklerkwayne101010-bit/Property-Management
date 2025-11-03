@@ -1,40 +1,17 @@
+
 import { PrismaClient } from '@prisma/client'
-import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
 async function main() {
-  // Create admin user
-  const adminPassword = await bcrypt.hash('admin123', 12)
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@propertybuddy.com' },
-    update: {},
-    create: {
-      email: 'admin@propertybuddy.com',
-      password: adminPassword,
-      role: 'admin',
-      firstName: 'Admin',
-      lastName: 'User',
-      phone: '+1234567890',
-    },
-  })
+  // NOTE: Users are now handled by Supabase Auth, not Prisma
+  // Create admin user in Supabase auth.users table using SQL files instead
+  
+  // For seeding, we'll use placeholder UUIDs for Supabase user IDs
+  const adminUserId = '11111111-1111-1111-1111-111111111111' // Replace with actual Supabase user ID
+  const clientUserId = '22222222-2222-2222-2222-222222222222' // Replace with actual Supabase user ID
 
-  // Create client user
-  const clientPassword = await bcrypt.hash('client123', 12)
-  const client = await prisma.user.upsert({
-    where: { email: 'client@propertybuddy.com' },
-    update: {},
-    create: {
-      email: 'client@propertybuddy.com',
-      password: clientPassword,
-      role: 'client',
-      firstName: 'John',
-      lastName: 'Doe',
-      phone: '+1234567891',
-    },
-  })
-
-  // Create properties (using PostgreSQL array types)
+  // Create properties
   const properties = await Promise.all([
     prisma.property.upsert({
       where: { id: 'prop1' },
@@ -51,7 +28,7 @@ async function main() {
         maxGuests: 8,
         amenities: JSON.stringify(['WiFi', 'Pool', 'Beach Access', 'Parking', 'Air Conditioning']),
         photos: JSON.stringify(['/placeholder-beachfront-1.jpg', '/placeholder-beachfront-2.jpg', '/placeholder-beachfront-3.jpg']),
-        ownerId: client.id,
+        ownerId: clientUserId, // Supabase user ID
       },
     }),
     prisma.property.upsert({
@@ -69,7 +46,7 @@ async function main() {
         maxGuests: 6,
         amenities: JSON.stringify(['WiFi', 'Fireplace', 'Hot Tub', 'Mountain Views', 'Kitchen']),
         photos: JSON.stringify(['/placeholder-cabin-1.jpg', '/placeholder-cabin-2.jpg']),
-        ownerId: client.id,
+        ownerId: clientUserId, // Supabase user ID
       },
     }),
     prisma.property.upsert({
@@ -87,12 +64,12 @@ async function main() {
         maxGuests: 4,
         amenities: JSON.stringify(['WiFi', 'Air Conditioning', 'Gym Access', 'Concierge', 'Balcony']),
         photos: JSON.stringify(['/placeholder-city-1.jpg', '/placeholder-city-2.jpg']),
-        ownerId: client.id,
+        ownerId: clientUserId, // Supabase user ID
       },
     }),
   ])
 
-  // Create bookings (using proper decimal type)
+  // Create bookings
   const bookings = await Promise.all([
     prisma.booking.create({
       data: {
@@ -103,7 +80,7 @@ async function main() {
         checkIn: new Date('2025-01-15'),
         checkOut: new Date('2025-01-20'),
         guests: 4,
-        totalAmount: 22000.00,  // ZAR amount
+        totalAmount: 2200.00,  // ZAR amount
         status: 'confirmed',
         notes: 'Special requests for beach equipment',
       },
@@ -117,7 +94,7 @@ async function main() {
         checkIn: new Date('2025-01-18'),
         checkOut: new Date('2025-01-25'),
         guests: 2,
-        totalAmount: 18000.00,  // ZAR amount
+        totalAmount: 1800.00,  // ZAR amount
         status: 'pending',
         notes: 'First-time visitor to Drakensberg',
       },
@@ -130,13 +107,13 @@ async function main() {
         checkIn: new Date('2025-01-22'),
         checkOut: new Date('2025-01-24'),
         guests: 1,
-        totalAmount: 5500.00,   // ZAR amount
+        totalAmount: 550.00,   // ZAR amount
         status: 'confirmed',
       },
     }),
   ])
 
-  // Create maintenance records (using proper enum types)
+  // Create maintenance records
   const maintenance = await Promise.all([
     prisma.maintenance.create({
       data: {
@@ -175,23 +152,23 @@ async function main() {
     }),
   ])
 
-  // Create package (using proper enum)
+  // Create package
   await prisma.package.create({
     data: {
-      ownerId: client.id,
+      ownerId: clientUserId, // Supabase user ID
       name: 'Standard Management',
       type: 'percentage_per_booking',
-      percentageRate: 15.0,  // Using Decimal type
+      percentageRate: 15.0,
       isActive: true,
     },
   })
 
-  // Create messages (using proper enum)
+  // Create messages (using placeholder user IDs)
   await Promise.all([
     prisma.message.create({
       data: {
-        senderId: admin.id,
-        recipientId: client.id,
+        senderId: adminUserId, // Supabase user ID
+        recipientId: clientUserId, // Supabase user ID
         subject: 'Welcome to Property Buddy AI',
         content: 'Your account has been set up successfully. You can now manage your properties through our platform.',
         messageType: 'general',
@@ -199,8 +176,8 @@ async function main() {
     }),
     prisma.message.create({
       data: {
-        senderId: admin.id,
-        recipientId: client.id,
+        senderId: adminUserId, // Supabase user ID
+        recipientId: clientUserId, // Supabase user ID
         subject: 'New Booking Request',
         content: 'You have received a new booking request for Beachfront Villa. Please review and respond within 24 hours.',
         messageType: 'booking_notification',
@@ -210,8 +187,8 @@ async function main() {
   ])
 
   console.log('Database seeded successfully!')
-  console.log('Admin user: admin@propertybuddy.com / admin123')
-  console.log('Client user: client@propertybuddy.com / client123')
+  console.log('Note: Users are now managed by Supabase Auth, not Prisma')
+  console.log('Create admin user in Supabase auth.users table using SQL files')
 }
 
 main()
