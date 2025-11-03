@@ -402,8 +402,8 @@ export default function HomePage() {
                 ))}
               </div>
               <p className="text-gray-600 mb-6">
-                "Property Buddy AI has transformed how I manage my 15 holiday properties in Cape Town. 
-                The ZAR currency support and local understanding make all the difference."
+                &ldquo;Property Buddy AI has transformed how I manage my 15 holiday properties in Cape Town.
+                The ZAR currency support and local understanding make all the difference.&rdquo;
               </p>
               <div className="flex items-center">
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
