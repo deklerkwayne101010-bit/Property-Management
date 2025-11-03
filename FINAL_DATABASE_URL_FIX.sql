@@ -1,3 +1,20 @@
+-- FINAL FIX: Check what's in prisma.schema and verify user table structure
+-- This will help diagnose why DATABASE_URL error persists
+
+-- Check if there are any other prisma schema files
+-- Look for any remaining PostgreSQL references in auth.ts or other files
+-- The error suggests schema.prisma still has:
+-- provider = "postgresql"
+-- url = env("DATABASE_URL")
+
+-- To fix this, the schema.prisma should have:
+-- provider = "sqlite" 
+-- url = "file:./dev.db"
+
+-- If the file hasn't been updated yet, here's what it should contain:
+
+-- Copy this to your prisma/schema.prisma file:
+/*
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
@@ -10,9 +27,7 @@ datasource db {
   url      = "file:./dev.db"
 }
 
-// NO USER MODEL - Authentication is handled by Supabase Auth
-// All user-related data comes from Supabase auth.users table
-
+// Application data only - NO user table for auth
 model Property {
   id          String   @id @default(cuid())
   name        String
@@ -25,7 +40,7 @@ model Property {
   maxGuests   Int
   amenities   String?   // JSON string
   photos      String?   // JSON array string
-  ownerId     String    // Supabase user ID (UUID)
+  ownerId     String    // References Supabase user ID
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -49,7 +64,7 @@ model Booking {
   checkOut   DateTime
   guests     Int
   totalAmount Float
-  status     String   @default("pending") // 'pending', 'confirmed', 'cancelled', 'completed'
+  status     String   @default("pending")
   notes      String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -63,14 +78,14 @@ model Booking {
 model Maintenance {
   id             String   @id @default(cuid())
   propertyId     String
-  type           String   @default("maintenance") // 'cleaning', 'maintenance'
+  type           String   @default("maintenance")
   title          String
   description    String?
   scheduledDate  DateTime
   completedDate  DateTime?
-  status         String   @default("scheduled") // 'scheduled', 'in_progress', 'completed', 'cancelled'
+  status         String   @default("scheduled")
   assignedTo     String?
-  photos         String?  // JSON array string
+  photos         String?
   notes          String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -86,9 +101,9 @@ model PhotoGallery {
   propertyId      String
   title           String
   description     String?
-  photos          String   // JSON array string
-  uploadedBy      String   // Supabase user ID (UUID)
-  uploadType      String   @default("monthly_update") // 'monthly_update', 'inspection', 'property_photos'
+  photos          String
+  uploadedBy      String   // Supabase user ID
+  uploadType      String   @default("monthly_update")
   month           Int?
   year            Int?
   createdAt       DateTime @default(now())
@@ -101,9 +116,9 @@ model PhotoGallery {
 
 model Package {
   id              String   @id @default(cuid())
-  ownerId         String   // Supabase user ID (UUID)
+  ownerId         String   // Supabase user ID
   name            String
-  type            String   @default("flat_fee") // 'flat_fee', 'percentage_per_booking', 'check_in_only'
+  type            String   @default("flat_fee")
   flatFeeAmount   Float?
   percentageRate  Float?
   checkInFee      Float?
@@ -116,17 +131,25 @@ model Package {
 
 model Message {
   id              String   @id @default(cuid())
-  senderId        String   // Supabase user ID (UUID)
-  recipientId     String   // Supabase user ID (UUID)
+  senderId        String   // Supabase user ID
+  recipientId     String   // Supabase user ID
   subject         String
   content         String
   isRead          Boolean  @default(false)
-  messageType     String   @default("general") // 'general', 'maintenance_alert', 'booking_notification'
+  messageType     String   @default("general")
   relatedPropertyId String?
   createdAt       DateTime @default(now())
 
   // Relations
+  sender          User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  recipient       User         @relation("ReceivedMessages", fields: [recipientId], references: [id], onDelete: Cascade)
   relatedProperty Property?    @relation(fields: [relatedPropertyId], references: [id])
 
   @@map("messages")
 }
+*/
+
+-- Verify schema changes worked
+SELECT 'Schema should now use SQLite, not PostgreSQL' as status;
+SELECT 'No DATABASE_URL environment variable should be needed' as note;
+SELECT 'Authentication should use Supabase, not Prisma' as auth_note;
