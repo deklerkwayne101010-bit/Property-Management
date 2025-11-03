@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -69,7 +69,7 @@ model Booking {
   checkIn    DateTime
   checkOut   DateTime
   guests     Int
-  totalAmount Float
+  totalAmount Decimal @db.Decimal(10, 2)
   status     String   @default("pending") // 'pending', 'confirmed', 'cancelled', 'completed'
   notes      String?
   createdAt  DateTime @default(now())
@@ -126,9 +126,9 @@ model Package {
   ownerId         String
   name            String
   type            String   @default("flat_fee") // 'flat_fee', 'percentage_per_booking', 'check_in_only'
-  flatFeeAmount   Float?
-  percentageRate  Float?
-  checkInFee      Float?
+  flatFeeAmount   Decimal? @db.Decimal(10, 2)
+  percentageRate  Decimal? @db.Decimal(5, 2)
+  checkInFee      Decimal? @db.Decimal(10, 2)
   isActive        Boolean  @default(true)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
