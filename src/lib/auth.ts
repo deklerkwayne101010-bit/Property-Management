@@ -42,7 +42,7 @@ export const authOptions: NextAuthOptions = {
             role: user.role,
             firstName: user.firstName,
             lastName: user.lastName,
-            avatar: user.avatar
+            avatar: user.avatar || undefined
           }
         } catch (error) {
           console.error('Auth error:', error)
