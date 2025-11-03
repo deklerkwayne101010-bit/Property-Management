@@ -25,13 +25,7 @@ export async function GET(
             name: true,
             city: true,
             address: true,
-            owner: {
-              select: {
-                firstName: true,
-                lastName: true,
-                email: true
-              }
-            }
+            ownerId: true
           }
         }
       }
@@ -153,13 +147,7 @@ export async function PATCH(
             id: true,
             name: true,
             city: true,
-            owner: {
-              select: {
-                firstName: true,
-                lastName: true,
-                email: true
-              }
-            }
+            ownerId: true
           }
         }
       }
@@ -232,13 +220,7 @@ export async function DELETE(
               id: true,
               name: true,
               city: true,
-              owner: {
-                select: {
-                  firstName: true,
-                  lastName: true,
-                  email: true
-                }
-              }
+              ownerId: true
             }
           }
         }
