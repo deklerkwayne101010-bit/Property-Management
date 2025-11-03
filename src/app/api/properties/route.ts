@@ -38,7 +38,6 @@ export async function GET(request: NextRequest) {
       prisma.property.findMany({
         where,
         include: {
-          ownerId: true,
           _count: {
             select: {
               bookings: true,
@@ -112,18 +111,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if owner exists
-    const owner = await prisma.user.findUnique({
-      where: { id: ownerId }
-    })
-
-    if (!owner) {
-      return NextResponse.json(
-        { error: 'Owner not found' },
-        { status: 404 }
-      )
-    }
-
     // Convert arrays to JSON strings (database expects String | null, not arrays)
     const amenitiesJson = amenities.length > 0 ? JSON.stringify(amenities) : null
     const photosJson = photos.length > 0 ? JSON.stringify(photos) : null
@@ -144,7 +131,12 @@ export async function POST(request: NextRequest) {
         isActive: true
       },
       include: {
-        ownerId: true
+        _count: {
+          select: {
+            bookings: true,
+            maintenance: true
+          }
+        }
       }
     })
 
