@@ -38,14 +38,7 @@ export async function GET(request: NextRequest) {
       prisma.property.findMany({
         where,
         include: {
-          owner: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true
-            }
-          },
+          ownerId: true,
           _count: {
             select: {
               bookings: true,
@@ -151,14 +144,7 @@ export async function POST(request: NextRequest) {
         isActive: true
       },
       include: {
-        owner: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true
-          }
-        }
+        ownerId: true
       }
     })
 
