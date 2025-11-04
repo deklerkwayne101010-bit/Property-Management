@@ -59,10 +59,10 @@ interface PropertyDetails {
   }
 }
 
-export default function PropertyDetailsPage({ 
-  params 
-}: { 
-  params: { id: string } 
+export default function PropertyDetailsPage({
+  params
+}: {
+  params: Promise<{ id: string }>
 }) {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -70,6 +70,7 @@ export default function PropertyDetailsPage({
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [propertyId, setPropertyId] = useState<string>('')
 
   useEffect(() => {
     if (status === 'loading') return
@@ -79,13 +80,19 @@ export default function PropertyDetailsPage({
       return
     }
 
-    loadProperty()
-  }, [session, status, router, params.id])
+    const initializeProperty = async () => {
+      const resolvedParams = await params
+      setPropertyId(resolvedParams.id)
+      loadProperty(resolvedParams.id)
+    }
 
-  const loadProperty = async () => {
+    initializeProperty()
+  }, [session, status, router])
+
+  const loadProperty = async (id: string) => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/properties/${params.id}`)
+      const response = await fetch(`/api/properties/${id}`)
       
       if (!response.ok) {
         throw new Error('Property not found')
@@ -102,7 +109,7 @@ export default function PropertyDetailsPage({
 
   const handleDelete = async () => {
     try {
-      const response = await fetch(`/api/properties/${params.id}`, {
+      const response = await fetch(`/api/properties/${propertyId}`, {
         method: 'DELETE'
       })
 
